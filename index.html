@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>【ご回答のお願い】省力化補助金 事前ヒアリング（歯科）</title>
+<style>
+  :root{--accent:#1d7a5f;--accent-bg:#e6f4ef;--ink:#1c1c1a;--muted:#6b6b66;--line:#e3e1da;--card:#ffffff;--bg:#f5f4ef;}
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Hiragino Kaku Gothic ProN","Yu Gothic",Meiryo,sans-serif;line-height:1.6;}
+  .wrap{max-width:540px;margin:0 auto;padding:16px;}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:20px;}
+  .head{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--muted);margin-bottom:8px;}
+  .sec{display:inline-block;font-size:12px;font-weight:600;color:var(--accent);background:var(--accent-bg);padding:3px 10px;border-radius:99px;margin-bottom:8px;}
+  .bar{height:7px;background:var(--bg);border-radius:99px;overflow:hidden;margin:6px 0;}
+  .bar > div{height:100%;width:0;background:var(--accent);transition:width .25s;}
+  .prog{font-size:12px;color:var(--muted);text-align:right;min-height:16px;}
+  .q{font-size:18px;font-weight:600;margin:6px 0 2px;}
+  .hint{font-size:13px;color:var(--muted);margin-bottom:10px;}
+  .opt{display:flex;align-items:center;gap:10px;width:100%;text-align:left;padding:13px 16px;margin:7px 0;border-radius:12px;border:1.5px solid var(--line);background:#fff;color:var(--ink);font-size:15px;cursor:pointer;transition:.12s;}
+  .opt:hover{border-color:var(--accent);}
+  .opt.sel{border-color:var(--accent);background:var(--accent-bg);color:var(--accent);font-weight:600;}
+  .opt .dot{width:18px;height:18px;border-radius:6px;border:1.5px solid var(--line);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:13px;}
+  .opt.sel .dot{background:var(--accent);border-color:var(--accent);color:#fff;}
+  input,textarea{width:100%;padding:11px 14px;font-size:15px;border:1.5px solid var(--line);border-radius:12px;font-family:inherit;margin:6px 0;background:#fff;}
+  input:focus,textarea:focus{outline:none;border-color:var(--accent);}
+  .eqbox{border:1px solid var(--line);border-radius:12px;padding:10px 12px;margin:8px 0;}
+  .eqbox .t{font-weight:600;font-size:14px;margin-bottom:2px;}
+  .btn{width:100%;padding:14px;font-size:15px;font-weight:600;border:none;border-radius:12px;background:var(--accent);color:#fff;cursor:pointer;margin-top:10px;}
+  .btn.ghost{background:#fff;color:var(--accent);border:1.5px solid var(--accent);}
+  .btn.sub{background:#fff;color:var(--muted);border:1px solid var(--line);}
+  .skip{display:block;margin:8px auto 0;border:none;background:none;color:var(--muted);font-size:13px;cursor:pointer;text-decoration:underline;}
+  .back{display:block;margin:10px auto 0;border:none;background:none;color:var(--muted);font-size:13px;cursor:pointer;}
+  .est{background:var(--accent-bg);border-radius:12px;padding:12px 14px;margin:12px 0;}
+  .est .l{font-size:12px;color:var(--accent);font-weight:600;}
+  .est .v{font-size:14px;color:var(--accent);margin-top:2px;}
+  .gtitle{font-size:13px;font-weight:600;color:var(--accent);margin:14px 0 2px;}
+  .row{display:flex;justify-content:space-between;gap:12px;padding:8px 0;border-bottom:1px solid var(--line);font-size:13px;}
+  .row .k{color:var(--muted);flex-shrink:0;max-width:48%;}
+  .row .val{text-align:right;}
+  .done{text-align:center;padding:6px 0;}
+  .done .ic{font-size:34px;}
+  .note{font-size:12px;color:var(--muted);margin-top:14px;text-align:center;}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="card">
+    <div class="head">🦷 省力化補助金 ヒアリング（歯科・詳細版）</div>
+    <div class="bar"><div id="bar"></div></div>
+    <div class="prog" id="prog"></div>
+    <div id="app" style="min-height:260px;padding-top:6px;"></div>
+  </div>
+  <div class="note">入力内容は、この端末の中だけで処理されます（どこにも自動送信されません）。途中の項目は「あとで／わからない」で飛ばせます。</div>
+</div>
+<script>
+const isMC=A=>A.kind==="医療法人";
+const hasEquip=A=>(A.equip||[]).some(x=>x!=="まだ決めていない");
+const big=A=>A.staff==="21〜50人"||A.staff==="51人以上";
+const painTasks=A=>(A.pain||[]).filter(x=>x!=="その他・まだ整理できていない");
+const Q=[
+ {sec:"基本情報",id:"name",type:"text",label:"医院名とお名前を教えてください",hint:"例）さくら歯科クリニック／院長 山田太郎",ph:"医院名・お名前"},
+ {sec:"基本情報",id:"kind",type:"single",label:"診療形態はどちらですか？",opts:["個人","医療法人","わからない"]},
+ {sec:"基本情報",id:"mochibun",type:"single",label:"出資の「持分」はありますか？",hint:"医療法人の場合のみ。書類の種類が変わる大事な項目です",when:isMC,opts:["持分あり","持分なし","わからない"]},
+ {sec:"基本情報",id:"since",type:"text",label:"開業（設立）はいつ頃ですか？",hint:"だいたいの年でOK",ph:"例）2015年 / 平成27年",skip:true},
+ {sec:"基本情報",id:"area",type:"text",label:"医院の所在地（市区町村まで）",ph:"例）東京都江戸川区",skip:true},
+ {sec:"基本情報",id:"staff",type:"single",label:"スタッフは何人ですか？（先生ご自身も含めて）",hint:"だいたいでOK",opts:["5人以下","6〜20人","21〜50人","51人以上"]},
+
+ {sec:"事業の現状",id:"branches",type:"single",label:"分院はありますか？",opts:["本院のみ","分院が1院ある","分院が2院以上"]},
+ {sec:"事業の現状",id:"field",type:"text",label:"診療科目・診療の特徴は？",hint:"例）一般歯科・小児・矯正・インプラント など",ph:"診療科目・特徴",skip:true},
+ {sec:"事業の現状",id:"visitors",type:"single",label:"1日のおおよその来院数は？",opts:["〜20人","20〜40人","40人以上","わからない"]},
+ {sec:"事業の現状",id:"strength",type:"text",label:"医院の強み・大切にしていることは？",hint:"事業計画書でアピールに使います",ph:"例）痛みの少ない治療、地域密着 など",skip:true},
+ {sec:"事業の現状",id:"staffing",type:"single",label:"人手不足を感じていますか？",opts:["とても感じる","やや感じる","あまり感じない"]},
+ {sec:"事業の現状",id:"hiring",type:"single",label:"求人（採用）の状況は？",opts:["募集しても来ない","たまに採れる","特に困っていない"]},
+ {sec:"事業の現状",id:"overtime",type:"single",label:"残業や休日出勤は多いですか？",opts:["多い","たまにある","ほぼない"]},
+
+ {sec:"困りごと（省力化）",id:"pain",type:"multi",label:"いま「手間だな」と感じている作業はどれですか？",hint:"いくつでも選べます",opts:["型取り・石膏模型・技工所とのやり取り","被せ物などの外注・納期待ち","レントゲン・診断・説明","予約・受付・問診の対応","器具の洗浄・滅菌・準備","その他・まだ整理できていない"]},
+ {sec:"困りごと（省力化）",id:"painTime",type:"text",label:"その作業に、だいたいどれくらい時間がかかっていますか？",hint:"わかる範囲で。これが「省力化の効果」の計算に使えます",ph:"例）型取り関連で1日2時間 / 1件あたり30分",skip:true},
+ {sec:"困りごと（省力化）",id:"painWho",type:"single",label:"その作業は、主に誰の手間になっていますか？",opts:["院長（先生）","歯科衛生士・技工士","受付スタッフ","みんなで分担"]},
+
+ {sec:"導入する設備",id:"equip",type:"multi",label:"導入を考えている機器はありますか？",hint:"いくつでも・なければ「まだ決めていない」",opts:["口腔内スキャナー","歯科用3Dプリンター／ミリング","歯科用CT・デジタルレントゲン","予約・問診システム","まだ決めていない"]},
+ {sec:"導入する設備",id:"equipDetail",type:"equipDetail",label:"選んだ機器の詳しい情報を教えてください",hint:"わかる範囲で。空欄でもOK（製品名・金額）",when:hasEquip,skip:true},
+ {sec:"導入する設備",id:"quote",type:"single",label:"見積書はお持ちですか？",when:hasEquip,opts:["取得済み（1社）","相見積もり中（2社以上）","これから取る"]},
+ {sec:"導入する設備",id:"newOrReplace",type:"single",label:"今ある設備の入れ替えですか？新規ですか？",when:hasEquip,opts:["新しく導入","今あるものの入れ替え","両方ある"]},
+
+ {sec:"省力化の効果",id:"timeDetail",type:"timeDetail",label:"手間な作業ごとに、今の時間と導入後の見込みを教えてください",hint:"だいたいでOK。「どれだけ楽になるか（省力化指数）」の計算に使います",when:A=>painTasks(A).length>0,skip:true},
+
+ {sec:"お金・賃上げ",id:"budget",type:"single",label:"設備にかけられそうな予算はどのくらいですか？",hint:"おおよそで（税抜）",opts:["〜500万円","500〜1000万円","1000〜1500万円","1500万円以上","わからない"]},
+ {sec:"お金・賃上げ",id:"lowWage",type:"text",label:"一番低い人の時給はいくらですか？",hint:"パート等も含めて。賃上げ要件のチェックに使います",ph:"例）1,100円 / わからない",skip:true},
+ {sec:"お金・賃上げ",id:"ledger",type:"single",label:"賃金台帳（給与の記録）はありますか？",opts:["ある","税理士・社労士にある","ない・わからない"]},
+ {sec:"お金・賃上げ",id:"wage",type:"single",label:"今後、スタッフのお給料を少しずつ上げていけそうですか？",hint:"この補助金は「賃上げ（年+3.5%目安）」が条件です",opts:["はい、上げていける","できれば上げたい","今はむずかしい"]},
+ {sec:"お金・賃上げ",id:"bigRaise",type:"single",label:"思いきった賃上げで、補助額を増やす特例を狙いますか？",hint:"給与+6%・最低賃金+50円で上限額アップ",opts:["狙いたい","通常でよい","わからない"]},
+ {sec:"お金・賃上げ",id:"plan21",type:"single",label:"「一般事業主行動計画」は公表していますか？",hint:"従業員21人以上で必要になります",when:big,opts:["公表済み","これから","わからない"]},
+
+ {sec:"申請の意思",id:"gbiz",type:"single",label:"電子申請用のID（GビズID）はお持ちですか？",hint:"なくても大丈夫。ご案内します",opts:["持っている","申請中","まだ・わからない"]},
+ {sec:"申請の意思",id:"hurry",type:"single",label:"今回（7/31締切）の回で急いで申請したいですか？",opts:["はい、急ぎたい","間に合えば","次の回でもよい"]},
+ {sec:"申請の意思",id:"contact",type:"text",label:"ご連絡先・ご希望があればどうぞ（任意）",hint:"電話・メール・聞きたいことなど",ph:"任意（空欄でもOK）",skip:true}
+];
+const A={}; let s=0;
+const app=document.getElementById("app"),bar=document.getElementById("bar"),prog=document.getElementById("prog");
+const J=v=>Array.isArray(v)?(v.join("、")||"—"):((v===undefined||v==="")?"—":v);
+const vis=i=>i<Q.length&&(!Q[i].when||Q[i].when(A));
+const nextV=i=>{while(i<Q.length&&!vis(i))i++;return i;};
+const prevV=i=>{while(i>0&&!vis(i))i--;return i;};
+function counts(){let total=0,cur=0;for(let i=0;i<Q.length;i++){if(vis(i)){total++;if(i<=s)cur++;}}return{total,cur};}
+function setBar(){const c=counts();const pct=s>=Q.length?100:Math.round((c.cur-1)/c.total*100);bar.style.width=pct+"%";prog.textContent=s<Q.length?("質問 "+c.cur+" / "+c.total):"完了";}
+function go(n){A.equipDetail=A.equipDetail||{};A.timeDetail=A.timeDetail||{};s=n;render();}
+function render(){
+ setBar();
+ if(s>=Q.length)return summary();
+ const q=Q[s];
+ let h='<div class="sec">'+q.sec+'</div>';
+ h+='<div class="q">'+q.label+'</div>';
+ if(q.hint)h+='<div class="hint">'+q.hint+'</div>';
+ if(q.type==="text"){
+   h+='<input id="tin" placeholder="'+(q.ph||'')+'" value="'+String(A[q.id]||'').replace(/"/g,'&quot;')+'">';
+   h+='<button class="btn" id="next">次へ &rarr;</button>';
+ }else if(q.type==="equipDetail"){
+   const items=(A.equip||[]).filter(x=>x!=="まだ決めていない");
+   const d=A.equipDetail||{};
+   h+='<div id="eq">'+items.map(m=>{const e=d[m]||{};return '<div class="eqbox"><div class="t">'+m+'</div><input data-m="'+m+'" data-f="name" placeholder="製品名・メーカー（例）○○社 △△" value="'+String(e.name||'').replace(/"/g,'&quot;')+'"><input data-m="'+m+'" data-f="price" inputmode="decimal" placeholder="金額の目安（万円）" value="'+String(e.price||'').replace(/"/g,'&quot;')+'"></div>';}).join("")+'</div>';
+   h+='<button class="btn" id="next">次へ &rarr;</button>';
+ }else if(q.type==="timeDetail"){
+   const items=painTasks(A);const d=A.timeDetail||{};
+   h+='<div id="td">'+items.map(m=>{const e=d[m]||{};return '<div class="eqbox"><div class="t">'+m+'</div><div style="display:flex;gap:8px;"><input data-m="'+m+'" data-f="before" inputmode="decimal" placeholder="今（時間/月）" value="'+String(e.before||'').replace(/"/g,'&quot;')+'" style="flex:1"><input data-m="'+m+'" data-f="after" inputmode="decimal" placeholder="導入後（時間/月）" value="'+String(e.after||'').replace(/"/g,'&quot;')+'" style="flex:1"></div></div>';}).join("")+'</div>';
+   h+='<button class="btn" id="next">次へ &rarr;</button>';
+ }else{
+   h+='<div id="opts">'+q.opts.map((o,k)=>{const sel=q.type==="multi"?(A[q.id]||[]).includes(o):A[q.id]===o;return '<button class="opt'+(sel?' sel':'')+'" data-k="'+k+'"><span class="dot">'+(sel?'✓':'')+'</span><span>'+o+'</span></button>';}).join("")+'</div>';
+   if(q.type==="multi")h+='<button class="btn" id="next">次へ &rarr;</button>';
+ }
+ if(q.skip)h+='<button class="skip" id="skip">この質問はあとで／わからない</button>';
+ if(s>0)h+='<button class="back" id="back">&larr; もどる</button>';
+ app.innerHTML=h;
+ const back=document.getElementById("back");if(back)back.onclick=()=>go(prevV(s-1));
+ const skip=document.getElementById("skip");if(skip)skip.onclick=()=>go(nextV(s+1));
+ if(q.type==="text"){document.getElementById("next").onclick=()=>{A[q.id]=document.getElementById("tin").value;go(nextV(s+1));};}
+ else if(q.type==="equipDetail"){document.getElementById("next").onclick=()=>{A.equipDetail=A.equipDetail||{};document.querySelectorAll("#eq input").forEach(inp=>{const m=inp.dataset.m,f=inp.dataset.f;A.equipDetail[m]=A.equipDetail[m]||{};A.equipDetail[m][f]=inp.value;});go(nextV(s+1));};}
+ else if(q.type==="timeDetail"){document.getElementById("next").onclick=()=>{A.timeDetail=A.timeDetail||{};document.querySelectorAll("#td input").forEach(inp=>{const m=inp.dataset.m,f=inp.dataset.f;A.timeDetail[m]=A.timeDetail[m]||{};A.timeDetail[m][f]=inp.value;});go(nextV(s+1));};}
+ else{document.querySelectorAll("#opts .opt").forEach(b=>{b.onclick=()=>{const o=q.opts[+b.dataset.k];if(q.type==="single"){A[q.id]=o;go(nextV(s+1));}else{const c=A[q.id]||[];A[q.id]=c.includes(o)?c.filter(x=>x!==o):[...c,o];render();}};});const n=document.getElementById("next");if(n)n.onclick=()=>go(nextV(s+1));}
+}
+function investAmt(){const d=A.equipDetail||{};let sum=0,has=false;(A.equip||[]).forEach(m=>{const p=parseFloat(String((d[m]||{}).price).replace(/[^0-9.]/g,""));if(!isNaN(p)&&p>0){sum+=p;has=true;}});if(has)return{amt:sum,src:"見積/入力金額の合計"};const mid={"〜500万円":400,"500〜1000万円":750,"1000〜1500万円":1250,"1500万円以上":1800}[A.budget];return mid?{amt:mid,src:"予算の目安"}:null;}
+function estimate(){
+ const small=A.staff==="5人以下"||A.staff==="6〜20人";
+ const rL=small?"2/3":"1/2",rate=small?2/3:1/2;
+ const cap={"5人以下":750,"6〜20人":1500,"21〜50人":3000,"51人以上":5000}[A.staff]||1500;
+ const inv=investAmt();
+ if(!inv)return "投資額が未確定のため概算は省略（ヒアリングで確認）。補助率は "+rL+"（区分："+(A.staff||"未確認")+"）。";
+ const raw=Math.round(inv.amt*rate),sub=Math.min(raw,cap);
+ return "投資 約"+Math.round(inv.amt)+"万円（"+inv.src+"）× 補助率"+rL+" = 約"+raw+"万円"+(raw>cap?"（上限"+cap+"万円を超えるため "+cap+"万円）":"")+" → 概算補助額 約"+sub+"万円";
+}
+function today(){const d=new Date();return d.getFullYear()+"年"+(d.getMonth()+1)+"月"+d.getDate()+"日";}
+function equipDetailText(){const d=A.equipDetail||{};const items=(A.equip||[]).filter(x=>x!=="まだ決めていない");if(!items.length)return "—";return items.map(m=>{const e=d[m]||{};return m+"："+(e.name||"製品名未記入")+(e.price?(" / "+e.price+"万円"):"");}).join(" ／ ");}
+function pIndex(b,a){b=parseFloat(b);a=parseFloat(a);if(isNaN(b)||b<=0||isNaN(a))return null;return Math.max(0,Math.min(1,(b-a)/b));}
+function timeText(){const d=A.timeDetail||{};const items=painTasks(A);if(!items.length)return "—";return items.map(m=>{const e=d[m]||{};const idx=pIndex(e.before,e.after);return m+"：今"+(e.before||"?")+"→導入後"+(e.after||"?")+"（時間/月）"+(idx!==null?("｜省力化指数 "+Math.round(idx*100)+"%"):"");}).join("　／　");}
+function groups(){return [
+ ["基本情報",[["記入日",today()],["医院名・お名前",J(A.name)],["診療形態",J(A.kind)+(A.mochibun?("（"+A.mochibun+"）"):"")],["開業・設立",J(A.since)],["所在地",J(A.area)],["スタッフ数",J(A.staff)]]],
+ ["事業の現状",[["分院",J(A.branches)],["診療科目・特徴",J(A.field)],["1日の来院数",J(A.visitors)],["医院の強み",J(A.strength)],["人手不足感",J(A.staffing)],["求人状況",J(A.hiring)],["残業・休日出勤",J(A.overtime)]]],
+ ["困りごと（省力化の対象）",[["手間な作業",J(A.pain)],["かかる時間（自己申告）",J(A.painTime)],["主に誰の手間",J(A.painWho)]]],
+ ["省力化の効果（自己申告）",[["作業ごとの前後時間・指数",timeText()]]],
+ ["導入する設備",[["導入したい機器",J(A.equip)],["機器の詳細",equipDetailText()],["見積の状況",J(A.quote)],["新規／入替",J(A.newOrReplace)]]],
+ ["お金・賃上げ",[["想定予算（税抜）",J(A.budget)],["補助額の概算",estimate()],["一番低い時給",J(A.lowWage)],["賃金台帳",J(A.ledger)],["賃上げの意向",J(A.wage)],["大幅賃上げ特例",J(A.bigRaise)],["行動計画(21人以上)",J(A.plan21)]]],
+ ["申請の意思",[["GビズID",J(A.gbiz)],["第7回(7/31)希望",J(A.hurry)],["ご連絡先・ご希望",J(A.contact)]]]
+];}
+function sheetText(){
+ let t="【省力化投資補助金（一般型）ヒアリングシート（叩き台）】＜歯科＞\n\n■ クライアント記入分\n";
+ groups().forEach(g=>{t+="\n＜"+g[0]+"＞\n";g[1].forEach(r=>{t+="・"+r[0]+"："+r[1]+"\n";});});
+ t+="\n■ 担当（軍師）が埋める分 ※叩き台用の空欄\n";
+ t+="・省力化指数の算定（導入前後の作業時間）：\n  対象業務／導入前(A)／導入後(B)／削減(A-B)／指数(A-B)÷A\n  1) \n  2) \n";
+ t+="・賃上げ要件チェック：給与支給総額 年平均+3.5%以上（見込み：　）／事業場内最低賃金＝地域別最賃+30円以上（現状の最低時給は上記参照）\n";
+ t+="・事業計画の骨子（課題→設備→省力化→賃上げ→将来）：\n  \n";
+ t+="・事務局へ確認すべき事項（持分なし医療法人の出資者名簿 等）：\n  \n";
+ t+="\n※補助率・上限額・賃上げ率は第7回公募要領を正本として最終確認すること。";
+ return t;
+}
+function sheetHTML(){
+ let body="";
+ groups().forEach(g=>{body+='<h3 style="font-size:14px;margin:14px 0 4px;color:#1d7a5f;">'+g[0]+'</h3><table style="border-collapse:collapse;width:100%;">'+g[1].map(r=>'<tr><td style="background:#f0efe9;width:38%;padding:6px 9px;border:1px solid #ccc;font-size:12px;">'+r[0]+'</td><td style="padding:6px 9px;border:1px solid #ccc;font-size:12px;">'+r[1]+'</td></tr>').join("")+'</table>';});
+ return '<div style="font-family:sans-serif;color:#1c1c1a;">'
+ +'<h2 style="font-size:17px;">省力化投資補助金（一般型）ヒアリングシート（叩き台）＜歯科＞</h2>'
+ +'<h3 style="font-size:15px;margin:12px 0 4px;">■ クライアント記入分</h3>'+body
+ +'<h3 style="font-size:15px;margin:16px 0 4px;">■ 担当（軍師）が埋める分 ※叩き台用</h3>'
+ +'<p style="font-size:12px;"><b>省力化指数の算定</b>（導入前後の作業時間）<br>対象業務／導入前(A)／導入後(B)／削減(A-B)／指数(A-B)÷A<br>1)<br>2)</p>'
+ +'<p style="font-size:12px;"><b>賃上げ要件チェック</b>：給与支給総額 年平均+3.5%以上（見込み：　）／事業場内最低賃金＝地域別最賃+30円以上</p>'
+ +'<p style="font-size:12px;"><b>事業計画の骨子</b>（課題→設備→省力化→賃上げ→将来）：</p>'
+ +'<p style="font-size:12px;"><b>事務局へ確認すべき事項</b>（持分なし医療法人の出資者名簿 等）：</p>'
+ +'<p style="font-size:11px;color:#777;">※補助率・上限額・賃上げ率は第7回公募要領を正本として最終確認すること。</p></div>';
+}
+function dl(content,mime,fn){const blob=new Blob(["﻿"+content],{type:mime});const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download=fn;document.body.appendChild(a);a.click();a.remove();}
+function summary(){
+ setBar();
+ let rows="";groups().forEach(g=>{rows+='<div class="gtitle">'+g[0]+'</div>';g[1].forEach(r=>{rows+='<div class="row"><span class="k">'+r[0]+'</span><span class="val">'+r[1]+'</span></div>';});});
+ app.innerHTML='<div class="done"><div class="ic">✅</div><div style="font-size:17px;font-weight:600;margin-top:4px;">ありがとうございました！</div><div class="hint">下のボタンで「ヒアリングシート」を保存し、担当へお送りください</div></div>'
+ +'<div class="est"><div class="l">補助額の概算（目安）</div><div class="v">'+estimate()+'</div></div>'
+ +'<div style="border:1px solid var(--line);border-radius:12px;padding:2px 14px;">'+rows+'</div>'
+ +'<button class="btn" id="word">📄 Wordで保存する</button>'
+ +'<button class="btn ghost" id="txt">テキストで保存する</button>'
+ +'<button class="btn sub" id="copy">内容をコピーする</button>'
+ +'<button class="back" id="re">最初からやり直す</button>';
+ const nm=String(A.name||"無題").replace(/[\\/:*?"<>|]/g,"");
+ document.getElementById("word").onclick=()=>dl('<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word" xmlns="http://www.w3.org/TR/REC-html40"><head><meta charset="utf-8"></head><body>'+sheetHTML()+'</body></html>','application/msword','省力化補助金_ヒアリングシート_'+nm+'.doc');
+ document.getElementById("txt").onclick=()=>dl(sheetText(),'text/plain;charset=utf-8','省力化補助金_ヒアリングシート_'+nm+'.txt');
+ document.getElementById("copy").onclick=()=>{navigator.clipboard.writeText(sheetText()).then(()=>{document.getElementById("copy").textContent="コピーしました ✓";});};
+ document.getElementById("re").onclick=()=>{for(const k in A)delete A[k];A.equipDetail={};A.timeDetail={};welcome();};
+}
+function welcome(){
+ s=0;bar.style.width="0%";prog.textContent="";
+ app.innerHTML='<div style="text-align:center;padding:6px 0;">'
+ +'<div style="font-size:34px;">🦷</div>'
+ +'<div style="font-size:19px;font-weight:600;margin-top:4px;">かんたん事前ヒアリング</div>'
+ +'<div style="font-size:13px;color:var(--muted);margin-top:2px;">省力化投資補助金（一般型）／歯科向け</div></div>'
+ +'<p style="font-size:14px;margin:14px 0 10px;">補助金の申請準備のため、いくつか質問にお答えください。専門的なことは不要です。<b>わかる範囲</b>で大丈夫です。</p>'
+ +'<div style="background:var(--bg);border-radius:12px;padding:14px 16px;font-size:13px;color:#555;line-height:1.9;">'
+ +'⏱ 所要時間：約5〜10分／スマホでOK<br>'
+ +'❓ わからない項目は「あとで／わからない」で飛ばせます<br>'
+ +'📄 最後に入力内容が「シート」になります（Word・テキストで保存）<br>'
+ +'🔒 入力はこの端末内だけで処理され、<b>自動でどこにも送信されません</b>。保存したシートを、いつものLINE・メールでご担当へお送りください。</div>'
+ +'<button class="btn" id="start" style="margin-top:16px;">はじめる →</button>';
+ document.getElementById("start").onclick=()=>go(0);
+}
+welcome();
+</script>
+</body>
+</html>
